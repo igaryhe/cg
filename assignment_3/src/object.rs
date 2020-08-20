@@ -23,10 +23,10 @@ impl Object for Sphere {
 
     fn intersect(&self, ray: &Ray, hit: &Intersection) -> bool {
         // TODO:
-	    //
-	    // Compute the intersection between the ray and the sphere
-	    // If the ray hits the sphere, set the result of the intersection in the
-	    // struct 'hit'
+        //
+        // Compute the intersection between the ray and the sphere
+        // If the ray hits the sphere, set the result of the intersection in the
+        // struct 'hit'
         false
     }
 }
