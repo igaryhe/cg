@@ -156,7 +156,7 @@ fn raytrace_shading() {
 
 fn main() {
     raytrace_sphere();
-    raytrace_parallelogram();
-    raytrace_perspective();
-    raytrace_shading();
+    // raytrace_parallelogram();
+    // raytrace_perspective();
+    // raytrace_shading();
 }
