@@ -44,6 +44,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "assignment_5"
+version = "0.1.0"
+dependencies = [
+ "glam 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "image 0.23.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "assignment_6"
+version = "0.1.0"
+dependencies = [
+ "glam 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
