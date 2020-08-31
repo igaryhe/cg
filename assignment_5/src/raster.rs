@@ -3,9 +3,9 @@ use glam::{vec2, vec3, Vec3, Mat3};
 use image::{RgbaImage, Rgba};
 
 pub struct Program {
-    pub vertex_shader: Box<dyn FnMut(VertexAttributes, UniformAttributes) -> VertexAttributes>,
-    pub fragment_shader: Box<dyn FnMut(VertexAttributes, UniformAttributes) -> FragmentAttributes>,
-    pub blending_shader: Box<dyn FnMut(FragmentAttributes, Rgba<u8>) -> Rgba<u8>>,
+    pub vertex_shader: Box<dyn Fn(VertexAttributes, UniformAttributes) -> VertexAttributes>,
+    pub fragment_shader: Box<dyn Fn(VertexAttributes, UniformAttributes) -> FragmentAttributes>,
+    pub blending_shader: Box<dyn Fn(FragmentAttributes, Rgba<u8>) -> Rgba<u8>>,
 }
 
 pub fn rasterize_triangle(program: &mut Program, uniform: UniformAttributes, v1: VertexAttributes, v2: VertexAttributes, v3: VertexAttributes, frame_buffer: &mut RgbaImage) {
