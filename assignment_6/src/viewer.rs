@@ -1,33 +1,32 @@
 use minifb::{Key, Window, WindowOptions, MouseMode, MouseButton};
 use image::RgbaImage;
 
-pub struct Viewer {
-    pub mouse_move: Box<dyn FnMut(f32, f32)>,
-    pub mouse_pressed: Box<dyn FnMut(f32, f32, MouseButton)>,
-    pub mouse_wheel: Box<dyn FnMut(u32, u32, bool)>,
-    pub key_pressed: Box<dyn FnMut(minifb::Key)>,
-    pub redraw: Box<dyn FnMut(&mut RgbaImage)>,
+pub trait ViewerStrategy {
+    fn mouse_move(&self, x: f32, y: f32);
+    fn mouse_pressed(&mut self, x: f32, y: f32, button: MouseButton);
+    fn mouse_wheel(dx: u32, dy: u32, is_direction_normal: bool);
+    fn key_pressed(&self, key: minifb::Key);
+    fn redraw(&mut self, img: &mut RgbaImage);
+    fn new() -> Self;
+}
+
+pub struct Viewer<S: ViewerStrategy> {
     pub redraw_next: bool,
     window: Window,
     buffer: RgbaImage,
-    size: (usize, usize),
+    pub s: S,
 }
 
-impl Viewer {
-    pub fn init(window_name: &str, w: usize, h: usize) -> Self {
+impl<S: ViewerStrategy> Viewer<S> {
+    pub fn new(window_name: &str, w: usize, h: usize) -> Self {
         let window = Window::new(window_name, w, h, WindowOptions::default())
         .unwrap_or_else(|e| panic!("{}", e));
         let buffer = RgbaImage::new(w as u32, h as u32);
         Self {
-            mouse_move: Box::new(|x, y| {}),
-            mouse_pressed: Box::new(|x, y, button|{}),
-            mouse_wheel: Box::new(|dx, dy, is_direction_normal| {}),
-            key_pressed: Box::new(|key| {}),
-            redraw: Box::new(|viewer| {}),
-            redraw_next: false,
+            redraw_next: true,
             window,
             buffer,
-            size: (w, h)
+            s: S::new(),
         }
     }
 
@@ -38,27 +37,28 @@ impl Viewer {
             return;
         }
         self.redraw_next = false;
-        (self.redraw)(&mut self.buffer);
+        self.s.redraw(&mut self.buffer);
     }
 
     pub fn launch(&mut self, redraw_interval: std::time::Duration) {
         self.window.limit_update_rate(Some(redraw_interval));
         while self.window.is_open() && !self.window.is_key_down(Key::Escape) {
 
-            // self.buffer.iter_mut().for_each(|i| *i = 0);
             self.window.get_mouse_pos(MouseMode::Discard).map(|(x, y)| {
 
-                (self.mouse_move)(x, y);
+                self.s.mouse_move(x, y);
                 if self.window.get_mouse_down(MouseButton::Left) {
-                    (self.mouse_pressed)(x, y, MouseButton::Left);
+                    self.s.mouse_pressed(x, y, MouseButton::Left);
+                    self.redraw_next = true;
                 } else if self.window.get_mouse_down(MouseButton::Right) {
-                    (self.mouse_pressed)(x, y, MouseButton::Right);
+                    self.s.mouse_pressed(x, y, MouseButton::Right);
+                    self.redraw_next = true;
                 }
             });
 
             self.window.get_keys_pressed(minifb::KeyRepeat::No).map(|keys| {
                 for key in keys {
-                    (self.key_pressed)(key)
+                    self.s.key_pressed(key)
                 }
             });
 
@@ -71,7 +71,10 @@ impl Viewer {
             }).collect::<Vec<u32>>();
 
             self.update();
-            self.window.update_with_buffer(&linear_buffer, self.size.0, self.size.1).unwrap();
+
+            let w = self.buffer.width() as usize;
+            let h = self.buffer.height() as usize;
+            self.window.update_with_buffer(&linear_buffer, w, h).unwrap();
         }
     }
 }
