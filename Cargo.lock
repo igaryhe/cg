@@ -8,9 +8,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "assignment_1"
 version = "0.1.0"
-dependencies = [
- "glam 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "assignment_2"
