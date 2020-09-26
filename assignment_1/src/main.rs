@@ -12,8 +12,12 @@ fn det(u: &Point, v: &Point) -> f32 {
 }
 
 #[inline]
-fn salient_angle(a: &Point, b: &Point, c: &Point) -> bool {
-    (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0.0
+fn salient_angle(a: &Point, b: &Point, c: &Point) -> i8 {
+    match (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) {
+        x if x < 0.0 => { -1 },
+        x if x == 0.0 => { 0 },
+        _ => { 1 }
+    }
 }
 
 fn convex_hull(points: &mut Vec<Point>) -> Vec<Point> {
@@ -30,7 +34,7 @@ fn convex_hull(points: &mut Vec<Point>) -> Vec<Point> {
     points.remove(0);
     points.remove(0);
     points.iter().for_each(|point| {
-        while !salient_angle(hull.get(hull.len() - 2).unwrap(), hull.last().unwrap(), point) {
+        while salient_angle(hull.get(hull.len() - 2).unwrap(), hull.last().unwrap(), point) != 1 {
             hull.pop();
         }
         hull.push(*point);
@@ -38,9 +42,25 @@ fn convex_hull(points: &mut Vec<Point>) -> Vec<Point> {
     hull
 }
 
-fn intersect_segment(a: Point, b: Point, c: Point, d: Point) -> bool {
+#[inline]
+fn on_segment(a: &Point, b: &Point, c: &Point) -> bool {
+    if b.x <= a.x.max(c.x) && b.x >= a.x.max(c.x) && b.y <= a.y.max(c.y) && b.y >= a.y.min(c.y) {
+        true
+    } else { false }
+}
+
+fn intersect_segment(a: &Point, b: &Point, c: &Point, d: &Point) -> bool {
     // TODO
-    true
+    let o1 = salient_angle(a, b, c);
+    let o2 = salient_angle(a, b, d);
+    let o3 = salient_angle(c, d, a);
+    let o4 = salient_angle(c, d, b);
+    if o1 != o2 && o3 != o4 { return true }
+    if o1 == 0 && on_segment(a, c, b) { return true }
+    if o2 == 0 && on_segment(a, c, d) { return true }
+    if o3 == 0 && on_segment(c, a, d) { return true }
+    if o4 == 0 && on_segment(c, b, d) { return true }
+    false
 }
 
 fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
@@ -60,7 +80,7 @@ fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
     // TODO
     let mut count: u32 = 0;
     for i in 0..poly.len() {
-        if intersect_segment(outside, query, poly[i], poly[(i + 1) % poly.len()]) {
+        if intersect_segment(&outside, &query, poly.get(i).unwrap(), poly.get((i + 1) % poly.len()).unwrap()) {
             count += 1;
         }
     }
@@ -70,6 +90,8 @@ fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    /*
     match args.len() {
         0 | 1 => {
             eprintln!("Usage: {} points.xyz output.obj", args[0]);
@@ -80,6 +102,7 @@ fn main() {
             save_obj(args[2].as_str(), hull);
         }
     }
+    */
 
     match args.len() {
         0 | 1 | 2 | 3 => {
