@@ -15,6 +15,7 @@ fn main() {
         },
         _ => {
             let scene = Scene::load(args[1].as_str());
+            println!("{}", scene.objects.len());
             scene.render();
         }
     }
