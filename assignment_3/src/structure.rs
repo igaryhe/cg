@@ -45,7 +45,7 @@ pub struct Material {
     pub specular_color: Vec3,
     pub specular_exponent: f32,
 
-    reflection_color: Vec3,
-    refraction_color: Vec3,
-    refraction_index: f32,
+    pub reflection_color: Vec3,
+    pub refraction_color: Vec3,
+    pub refraction_index: f32,
 }

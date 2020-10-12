@@ -9,17 +9,6 @@
         "focal_length": 5.0,
         "lens_radius": 0.08
     },
-    "materials": [
-        {
-            "ambient_color": [0.0, 0.5, 0.0],
-            "diffuse_color": [0.5, 0.5, 0.5],
-            "specular_color": [0.2, 0.2, 0.2],
-            "specular_exponent": 256.0,
-            "reflection_color": [0.7, 0.7, 0.7],
-            "refraction_color": [0.0, 0.0, 0.0],
-            "refraction_index": 1.0
-        }
-    ],
     "lights": [
         {
             "position": [8, 8, 0],
@@ -104,7 +93,7 @@
                 "refraction_color": [0.0, 0.0, 0.0],
                 "refraction_index": 1.0
             },
-            "position": [1, 0.2, -1],
+            "position": [1, 0.2, -2],
             "radius": 1
         },
         {
