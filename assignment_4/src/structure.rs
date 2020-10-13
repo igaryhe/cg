@@ -33,19 +33,19 @@ pub struct Intersection {
 pub struct Camera {
     pub is_perspective: bool,
     pub position: Vec3,
-    field_of_view: f32,
+    pub field_of_view: f32,
     pub focal_length: f32,
-    lens_radius: f32,
+    pub lens_radius: f32,
 }
 
 #[derive(Default, Copy, Clone, Serialize, Deserialize)]
 pub struct Material {
     pub ambient_color: Vec3,
     pub diffuse_color: Vec3,
-    specular_color: Vec3,
-    specular_exponent: f32,
+    pub specular_color: Vec3,
+    pub specular_exponent: f32,
 
-    reflection_color: Vec3,
-    refraction_color: Vec3,
-    refraction_index: f32,
+    pub reflection_color: Vec3,
+    pub refraction_color: Vec3,
+    pub refraction_index: f32,
 }

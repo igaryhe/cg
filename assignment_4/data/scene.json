@@ -4,9 +4,9 @@
     "camera":
     {
         "is_perspective": true,
-        "position": [0.0, 0.0, 2.0],
+        "position": [0.0, 0.0, 5.0],
         "field_of_view": 0.7854,
-        "focal_length": 2.0,
+        "focal_length": 5.0,
         "lens_radius": 0.08
     },
     "materials": [
@@ -52,9 +52,18 @@
     ],
     "objects": [
         {
-            "type": "Mesh",
-            "material": {},
-            "path": "dragon.off"
+            "type": "Sphere",
+            "material": {
+                "ambient_color": [0.0, 0.5, 0.0],
+                "diffuse_color": [0.5, 0.5, 0.5],
+                "specular_color": [0.2, 0.2, 0.2],
+                "specular_exponent": 256.0,
+                "reflection_color": [0.7, 0.7, 0.7],
+                "refraction_color": [0.0, 0.0, 0.0],
+                "refraction_index": 1.0
+            },
+            "position": [10, 0, 1],
+            "radius": 1
         },
         {
             "type": "Sphere",
@@ -67,7 +76,7 @@
                 "refraction_color": [0.0, 0.0, 0.0],
                 "refraction_index": 1.0
             },
-            "position": [5, 0, 1],
+            "position": [7, 0.05, -1],
             "radius": 1
         },
         {
@@ -82,7 +91,21 @@
                 "refraction_index": 1.0
             },
             "position": [4, 0.1, 1],
-            "radius": 0.5
+            "radius": 1
+        },
+        {
+            "type": "Sphere",
+            "material": {
+                "ambient_color": [0.0, 0.5, 0.0],
+                "diffuse_color": [0.5, 0.5, 0.5],
+                "specular_color": [0.2, 0.2, 0.2],
+                "specular_exponent": 256.0,
+                "reflection_color": [0.7, 0.7, 0.7],
+                "refraction_color": [0.0, 0.0, 0.0],
+                "refraction_index": 1.0
+            },
+            "position": [1, 0.2, -2],
+            "radius": 1
         },
         {
             "type": "Sphere",
@@ -96,35 +119,7 @@
                 "refraction_index": 1.0
             },
             "position": [-2, 0.4, 1],
-            "radius": 0.5
-        },
-        {
-            "type": "Sphere",
-            "material": {
-                "ambient_color": [0.0, 0.5, 0.0],
-                "diffuse_color": [0.5, 0.5, 0.5],
-                "specular_color": [0.2, 0.2, 0.2],
-                "specular_exponent": 256.0,
-                "reflection_color": [0.7, 0.7, 0.7],
-                "refraction_color": [0.0, 0.0, 0.0],
-                "refraction_index": 1.0
-            },
-            "position": [-5, 0.8, -1],
-            "radius": 0.5
-        },
-        {
-            "type": "Sphere",
-            "material": {
-                "ambient_color": [0.0, 0.5, 0.0],
-                "diffuse_color": [0.5, 0.5, 0.5],
-                "specular_color": [0.2, 0.2, 0.2],
-                "specular_exponent": 256.0,
-                "reflection_color": [0.7, 0.7, 0.7],
-                "refraction_color": [0.0, 0.0, 0.0],
-                "refraction_index": 1.0
-            },
-            "position": [-8, 1.6, 1],
-            "radius": 0.5
+            "radius": 1
         },
         {
             "type": "Sphere",

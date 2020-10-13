@@ -2,9 +2,11 @@ mod structure;
 mod object;
 mod scene;
 mod function;
+mod bbox;
+mod triangle;
 
 pub use scene::Scene;
-pub use object::Object;
+pub use object::*;
 use std::env;
 
 fn main() {
@@ -14,7 +16,10 @@ fn main() {
             eprintln!("Usage: {} scene.json", args[0]);
         },
         _ => {
-            let scene = Scene::load(args[1].as_str());
+            let mut scene = Scene::load(args[1].as_str());
+            let mesh = Mesh::new("data/dodeca.off", scene.materials[0]);
+            scene.objects.clear();
+            scene.objects.push(Box::new(mesh));
             scene.render();
         }
     }

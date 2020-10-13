@@ -14,7 +14,7 @@ fn main() {
             eprintln!("Usage: {} scene.json", args[0]);
         },
         _ => {
-            let scene = Scene::load(args[1].as_str());
+            let mut scene = Scene::load(args[1].as_str());
             println!("{}", scene.objects.len());
             scene.render();
         }

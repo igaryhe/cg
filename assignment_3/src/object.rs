@@ -8,6 +8,7 @@ use mint::ColumnMatrix3;
 pub trait Object: Sync {
     fn material(&self) -> Material;
     fn intersect(&self, ray: &Ray) -> Option<Intersection>;
+    fn set_position(&mut self, pos: Vec3);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -66,6 +67,10 @@ impl Object for Sphere {
             }
         }
     }
+
+    fn set_position(&mut self, pos: Vec3) {
+        self.position = pos
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -102,5 +107,9 @@ impl Object for Parallelogram {
             },
             false => None
         }
+    }
+
+    fn set_position(&mut self, pos: Vec3) {
+        self.origin = pos
     }
 }
