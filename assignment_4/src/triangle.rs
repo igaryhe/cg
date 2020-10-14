@@ -6,11 +6,11 @@ use crate::bbox::Bbox;
 use nalgebra::{Matrix3, Vector3};
 use mint::ColumnMatrix3;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
 pub struct Triangle {
-    a: Vec3,
-    b: Vec3,
-    c: Vec3,
+    pub a: Vec3,
+    pub b: Vec3,
+    pub c: Vec3,
 }
 
 impl Triangle {
@@ -31,19 +31,23 @@ impl Triangle {
         let decomp = a.lu();
         let b = ray.origin - origin;
         let b = Vector3::from(mint::Vector3::from(b));
-        let x = decomp.solve(&b).unwrap();
-        match x[0] >= 0.0 && x[1] >= 0.0 && x[0] + x[1] <= 1.0 && x[2] >= 0.0 {
-            true => {
-                println!("Triangle!");
-                let position = ray.origin + x[2] * ray.direction;
-                let normal = v.cross(u).normalize();
-                Some(Intersection {
-                    position,
-                    normal,
-                    ray_param: 0.0
-                })
+        let x = decomp.solve(&b);
+        match x {
+            Some(xr) => {
+                match xr[0] >= 0.0 && xr[1] >= 0.0 && xr[0] + xr[1] <= 1.0 && xr[2] >= 0.0 {
+                    true => {
+                        let position = ray.origin + xr[2] * ray.direction;
+                        let normal = v.cross(u).normalize();
+                        Some(Intersection {
+                            position,
+                            normal,
+                            ray_param: 0.0
+                        })
+                    },
+                    false => None,
+                }
             },
-            false => None
+            None => None,
         }
     }
 
@@ -53,9 +57,7 @@ impl Triangle {
 
     pub fn bbox(&self) -> Bbox {
         let mut bbox = Bbox::default();
-        bbox.expand(self.a);
-        bbox.expand(self.b);
-        bbox.expand(self.c);
+        bbox.expand(self);
         bbox
     }
 }

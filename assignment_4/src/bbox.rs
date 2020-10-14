@@ -1,6 +1,7 @@
 use glam::Vec3;
 use serde::{Serialize, Deserialize};
 use crate::structure::*;
+use crate::triangle::Triangle;
 
 #[derive(Default, Serialize, Deserialize, Clone, Copy)]
 pub struct Bbox {
@@ -9,40 +10,19 @@ pub struct Bbox {
 }
 
 impl Bbox {
-    pub fn expand(&mut self, point: Vec3) {
-        if point.x() < self.min.x() {
-            self.min.set_x(point.x());
-        }
-        
-        if point.y() < self.min.y() {
-            self.min.set_y(point.y());
-        }
-
-        if point.z() < self.min.z() {
-            self.min.set_z(point.z());
-        }
-
-        if point.x() > self.max.x() {
-            self.max.set_x(point.x());
-        }
-        
-        if point.y() > self.max.y() {
-            self.max.set_y(point.y());
-        }
-
-        if point.z() > self.max.z() {
-            self.max.set_z(point.z());
-        }
+    pub fn expand(&mut self, triangle: &Triangle) {
+        self.min = self.min.min(triangle.a.min(triangle.b.min(triangle.c)));
+        self.max = self.max.max(triangle.a.max(triangle.b.max(triangle.c)));
     }
 
     pub fn intersect(&self, ray: &Ray) -> bool {
-        let mut t1 = (self.min.x() - ray.origin.x()) * -ray.direction.x();
-        let mut t2 = (self.max.x() - ray.origin.x()) * -ray.direction.x();
+        let mut t1 = (self.min.x() - ray.origin.x()) * (1.0 / ray.direction.x());
+        let mut t2 = (self.max.x() - ray.origin.x()) * (1.0 / ray.direction.x());
         let mut tmin = t1.min(t2);
         let mut tmax = t1.max(t2);
         for i in 1..3 {
-            t1 = (self.min[i] - ray.origin[i]) * -ray.direction[i];
-            t2 = (self.max[i] - ray.origin[i]) * -ray.direction[i];
+            t1 = (self.min[i] - ray.origin[i]) * (1.0 / ray.direction[i]);
+            t2 = (self.max[i] - ray.origin[i]) * (1.0 / -ray.direction[i]);
             tmin = tmin.max(t1.min(t2));
             tmax = tmax.min(t1.max(t2));
         }

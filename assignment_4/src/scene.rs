@@ -2,8 +2,8 @@ use crate::structure::*;
 use crate::Object;
 use glam::Vec3;
 use serde::Deserialize;
-use rayon::prelude::*;
 use rand::prelude::*;
+use rayon::prelude::*;
 use indicatif::{ParallelProgressIterator, ProgressBar};
 use image::{RgbaImage, Rgba};
 use crate::function::*;
@@ -41,17 +41,19 @@ impl Scene {
 
         let mut img = RgbaImage::new(w, h);
         let pb = ProgressBar::new((w * h).into());
-    
         img.enumerate_pixels_mut().par_bridge().progress_with(pb).for_each(|(x, y, pixel)| {
             let shift = grid_origin + (x as f32 + 0.5) * x_displacement + (y as f32 + 0.5) * y_displacement;
-            let ray_count = 5;
+
+            let ray_count = 20;
+
             let mut colors = vec![Vec3::zero(); ray_count];
+
             colors.par_iter_mut().for_each(|color| {
                 let mut rng = rand::thread_rng();
                 let r = self.camera.lens_radius * rng.gen::<f32>().sqrt();
                 let theta = 2.0 * std::f32::consts::PI * rng.gen::<f32>();
                 let offset = Vec3::new(r * theta.cos(), r * theta.sin(), 0.0);
-                let max_bounce = 5;
+
                 let ray = match self.camera.is_perspective {
                     true => {
                         // Perspective camera
@@ -70,7 +72,8 @@ impl Scene {
                         }
                     }
                 };
-                *color = shoot_ray(self, ray, max_bounce);
+
+                *color = shoot_ray(self, ray);
             });
             let color: Vec3 = colors.into_iter().fold(Vec3::zero(), |sum, c| sum + c) / ray_count as f32;
             *pixel = Rgba([(color.x() * 255.0) as u8, (color.y() * 255.0) as u8, (color.z() * 255.0) as u8, 255]);

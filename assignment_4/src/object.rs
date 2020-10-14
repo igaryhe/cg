@@ -108,78 +108,18 @@ impl Object for Parallelogram {
 }
 
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize)]
 pub struct Node {
     bbox: Bbox,
-    parent: usize,
-    left: usize,
-    right: usize,
-    triangle: usize,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AABBTree {
-    nodes: Vec<Node>,
-    root: usize,
-}
-
-impl AABBTree {
-    pub fn new(triangles: &Vec<Triangle>) -> Self {
-        // TODO (Assignment 3)
-
-	    // Method (1): Top-down approach.
-	    // Split each set of primitives into 2 sets of roughly equal size,
-	    // based on sorting the centroids along one direction or another.
-
-	    // Method (2): Bottom-up approach.
-        // Merge nodes 2 by 2, starting from the leaves of the forest, until only 1 tree is left.
-        let mut centroids = vec![];
-        let mut nodes: Vec<Node> = vec![];
-        triangles.iter().enumerate().for_each(|(i, triangle)| {
-            centroids.push(triangle.centroid());
-            nodes.push(Node {
-                bbox: triangle.bbox(),
-                parent: usize::MAX,
-                left: usize::MAX,
-                right: usize::MAX,
-                triangle: i,
-            });
-        });
-        
-        for i in 0..centroids.len() {
-            if nodes[i].parent == usize::MAX {
-                let mut cloest = i + 1;
-                for j in i + 1..centroids.len() {
-                    if centroids[i] - centroids[j] < centroids[i] - centroids[cloest] {
-                        cloest = j;
-                    }
-                    let node = Node {
-                        bbox: nodes[i].bbox.merge(&nodes[cloest].bbox),
-                        parent: usize::MAX,
-                        left: i,
-                        right: cloest,
-                        triangle: usize::MAX,
-                    };
-                    centroids.push(node.bbox.centroid());
-                    nodes.push(node);
-                    nodes[i].parent = centroids.len() - 1;
-                    nodes[cloest].parent = centroids.len() - 1;
-                }
-            }
-        }
-        let root = centroids.len() - 1;
-        Self {
-            nodes,
-            root,
-        }
-    }
+    left: Option<Box<Node>>,
+    right: Option<Box<Node>>,
+    triangle: Option<Triangle>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Mesh {
     material: Material,
-    triangles: Vec<Triangle>,
-    bvh: AABBTree,
+    bvh: Node,
 }
 
 pub fn load_off(filename: &str) -> Vec<Triangle> {
@@ -224,49 +164,101 @@ impl Object for Mesh {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        self.bvh.nodes[self.bvh.root].search(ray, &self.bvh.nodes, &self.triangles)
+        self.bvh.search(ray)
     }
 }
 
 impl Mesh {
     pub fn new(filename: &str, material: Material) -> Self {
         let triangles = load_off(filename);
-        let bvh = AABBTree::new(&triangles);
+        let bvh = Node::tree(&triangles);
         Self {
             material,
-            triangles,
             bvh,
         }
     }
 }
 
 impl Node {
-    fn search(&self, ray: &Ray, nodes: &Vec<Node>, triangles: &Vec<Triangle>) -> Option<Intersection> {
-        if self.triangle != usize::MAX {
-            triangles[self.triangle].intersect(ray)
-        } else {
-            if self.bbox.intersect(ray) {
-                let left = nodes[self.left].search(ray, nodes, triangles);
-                let right = nodes[self.right].search(ray, nodes, triangles);
-                match left {
-                    Some(lhit) => {
-                        match right {
-                            Some(rhit) => {
-                                if (lhit.position - ray.origin).length() < (rhit.position - ray.origin).length() {
-                                    Some(lhit)
-                                } else { Some(rhit) }
-                            },
-                            None => Some(lhit),
-                        }
-                    },
-                    None => {
-                        match right {
-                            Some(rhit) => Some(rhit),
-                            None => None,
-                        }
-                    },
-                }
-            } else { None }
+    fn search(&self, ray: &Ray) -> Option<Intersection> {
+        match self.triangle {
+            Some(tri) => {
+                tri.intersect(ray)
+            },
+            None => {
+                if self.bbox.intersect(ray) {
+                    let left = match &self.left {
+                        Some(node) => { node.search(ray) },
+                        None => { None },
+                    };
+                    let right = match &self.right {
+                        Some(node) => { node.search(ray) },
+                        None => { None },
+                    };
+                    match left {
+                        Some(lhit) => {
+                            match right {
+                                Some(rhit) => {
+                                    if (lhit.position - ray.origin).length() < (rhit.position - ray.origin).length() {
+                                        Some(lhit)
+                                    } else { Some(rhit) }
+                                },
+                                None => Some(lhit),
+                            }
+                        },
+                        None => {
+                            match right {
+                                Some(rhit) => Some(rhit),
+                                None => None,
+                            }
+                        },
+                    }
+                } else { None }
+            },
         }
+    }
+
+    fn cost(&self, node: &Node) -> f32 {
+        (self.bbox.centroid() - node.bbox.centroid()).length()
+    }
+
+    pub fn tree(triangles: &Vec<Triangle>) -> Self {
+        // TODO (Assignment 3)
+
+	// Method (1): Top-down approach.
+	// Split each set of primitives into 2 sets of roughly equal size,
+	// based on sorting the centroids along one direction or another.
+
+	// Method (2): Bottom-up approach.
+        // Merge nodes 2 by 2, starting from the leaves of the forest, until only 1 tree is left.
+        let mut nodes: Vec<Node> = vec![];
+        triangles.iter().for_each(|triangle| {
+            let node = Node {
+                bbox: triangle.bbox(),
+                left: None,
+                right: None,
+                triangle: Some(*triangle),
+            };
+            nodes.push(node);
+        });
+        
+        while nodes.len() != 1 {
+            let mut cloest = 1;
+            for j in 1..nodes.len() {
+                if nodes[0].cost(&nodes[j]) < nodes[0].cost(&nodes[cloest]) {
+                    cloest = j;
+                }
+            }
+            let rnode = nodes.remove(cloest);
+            let lnode = nodes.remove(0);
+            let node = Node {
+                bbox: lnode.bbox.merge(&rnode.bbox),
+                left: Some(Box::new(lnode)),
+                right: Some(Box::new(rnode)),
+                triangle: None,
+            };
+            nodes.push(node);
+        }
+        nodes.remove(0)
     }
 }

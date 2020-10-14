@@ -1,7 +1,7 @@
 use crate::{structure::*, Object, Scene};
 use glam::Vec3;
 
-pub fn ray_color(scene: &Scene, ray: Ray, obj: &Box<dyn Object>, hit: Intersection, max_bounce: u32) -> Vec3 {
+pub fn ray_color(scene: &Scene, ray: Ray, obj: &Box<dyn Object>, hit: Intersection) -> Vec3 {
     let mat: Material = obj.material();
 
     let ambient_color: Vec3 = mat.ambient_color * scene.ambient_light;
@@ -14,15 +14,17 @@ pub fn ray_color(scene: &Scene, ray: Ray, obj: &Box<dyn Object>, hit: Intersecti
 
         // TODO: Shoot a shadow ray to determine if the light should affect the intersection point
         if is_light_visible(scene, &hit, light) {
-            // Diffuse contribution
-            let diffuse = mat.diffuse_color * li.dot(n).max(0.0);
-
-            // TODO: Specular contribution
-            let specular = mat.specular_color * n.dot((li + v).normalize()).max(0.0).powf(mat.specular_exponent);
-
-            let d = light.position - hit.position;
-            lights_color += (diffuse + specular) * light.intensity / d.length_squared();
+            
         }
+
+        // Diffuse contribution
+        let diffuse = mat.diffuse_color * li.dot(n).max(0.0);
+
+        // TODO: Specular contribution
+        let specular = mat.specular_color * n.dot((li + v).normalize()).max(0.0).powf(mat.specular_exponent);
+
+        let d = light.position - hit.position;
+        lights_color += (diffuse + specular) * light.intensity / d.length_squared();
     });
 
     /*
@@ -113,9 +115,9 @@ pub fn is_light_visible(scene: &Scene, hit: &Intersection, light: &Light) -> boo
     }
 }
 
-pub fn shoot_ray(scene: &Scene, ray: Ray, max_bounce: u32) -> Vec3 {
+pub fn shoot_ray(scene: &Scene, ray: Ray) -> Vec3 {
     match find_nearest_object(scene, &ray) {
-        Some((obj, hit)) => ray_color(scene, ray, obj, hit, max_bounce),
+        Some((obj, hit)) => ray_color(scene, ray, obj, hit),
         None => scene.background_color
     }
 }
