@@ -225,11 +225,11 @@ impl Node {
     pub fn tree(triangles: &Vec<Triangle>) -> Self {
         // TODO (Assignment 3)
 
-	// Method (1): Top-down approach.
-	// Split each set of primitives into 2 sets of roughly equal size,
-	// based on sorting the centroids along one direction or another.
+        // Method (1): Top-down approach.
+        // Split each set of primitives into 2 sets of roughly equal size,
+        // based on sorting the centroids along one direction or another.
 
-	// Method (2): Bottom-up approach.
+        // Method (2): Bottom-up approach.
         // Merge nodes 2 by 2, starting from the leaves of the forest, until only 1 tree is left.
         let mut nodes: Vec<Node> = vec![];
         triangles.iter().for_each(|triangle| {

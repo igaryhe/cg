@@ -44,7 +44,7 @@ impl Scene {
         img.enumerate_pixels_mut().par_bridge().progress_with(pb).for_each(|(x, y, pixel)| {
             let shift = grid_origin + (x as f32 + 0.5) * x_displacement + (y as f32 + 0.5) * y_displacement;
 
-            let ray_count = 20;
+            let ray_count = 1;
 
             let mut colors = vec![Vec3::zero(); ray_count];
 
@@ -58,8 +58,8 @@ impl Scene {
                     true => {
                         // Perspective camera
                         // TODO
-                        let origin = self.camera.position + offset;
-                        let direction = (shift - offset).normalize();
+                        let origin = self.camera.position + Vec3::new(0.08, 0.08, 0.0);
+                        let direction = shift.normalize();
                         Ray {
                             origin,
                             direction,

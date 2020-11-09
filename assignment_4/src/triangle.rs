@@ -26,18 +26,16 @@ impl Triangle {
         let u = self.b - self.a;
         let v = self.c - self.a;
         let origin = self.a;
-        let a = Mat3::from_cols(u, v, -ray.direction);
-        let a = Matrix3::from(ColumnMatrix3::from(a));
+        let a = Matrix3::from(ColumnMatrix3::from(Mat3::from_cols(u, v, -ray.direction)));
         let decomp = a.lu();
-        let b = ray.origin - origin;
-        let b = Vector3::from(mint::Vector3::from(b));
+        let b = Vector3::from(mint::Vector3::from(ray.origin - origin));
         let x = decomp.solve(&b);
         match x {
             Some(xr) => {
                 match xr[0] >= 0.0 && xr[1] >= 0.0 && xr[0] + xr[1] <= 1.0 && xr[2] >= 0.0 {
                     true => {
                         let position = ray.origin + xr[2] * ray.direction;
-                        let normal = v.cross(u).normalize();
+                        let normal = u.cross(v).normalize();
                         Some(Intersection {
                             position,
                             normal,
