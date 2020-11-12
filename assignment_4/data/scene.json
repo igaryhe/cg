@@ -4,9 +4,9 @@
     "camera":
     {
         "is_perspective": true,
-        "position": [0.0, 0.0, 5.0],
+        "position": [0.0, 0.0, 2.0],
         "field_of_view": 0.7854,
-        "focal_length": 5.0,
+        "focal_length": 2.0,
         "lens_radius": 0.08
     },
     "materials": [

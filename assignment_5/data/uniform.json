@@ -1,0 +1,22 @@
+{
+    "view": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    "light": {
+        "position": [-0.2, 0.5, -1],
+        "intensity": [2, 2, 2]
+    },
+    "material": {
+        "ambient_color": [0.0, 0.5, 0.0],
+        "diffuse_color": [0.5, 0.5, 0.5],
+        "specular_color": [0.2, 0.2, 0.2],
+        "specular_exponent": 256.0
+    },
+    "camera": {
+        "is_perspective": false,
+        "position": [0.0, 0.0, 2.0],
+        "field_of_view": 0.7854
+    },
+    "transform": {
+        "angle": 0.0,
+        "distance": 0.0
+    }
+}

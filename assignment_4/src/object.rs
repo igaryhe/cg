@@ -5,6 +5,8 @@ use crate::bbox::Bbox;
 use nalgebra::{Matrix3, Vector3};
 use mint::ColumnMatrix3;
 use crate::triangle::Triangle;
+use indicatif::ProgressBar;
+use rayon::prelude::*;
 
 #[typetag::serde(tag = "type")]
 pub trait Object: Sync {
@@ -241,14 +243,21 @@ impl Node {
             };
             nodes.push(node);
         });
-        
+
+        println!("Building BVH:");
+        let pb = ProgressBar::new(nodes.len() as u64);
         while nodes.len() != 1 {
-            let mut cloest = 1;
-            for j in 1..nodes.len() {
-                if nodes[0].cost(&nodes[j]) < nodes[0].cost(&nodes[cloest]) {
-                    cloest = j;
-                }
-            }
+            pb.inc(1);
+            // let mut cloest = 1;
+            // let max_len = if nodes.len() > 100 { 100 } else { nodes.len() };
+            // for j in 1..max_len {
+            //     if nodes[0].cost(&nodes[j]) < nodes[0].cost(&nodes[cloest]) {
+            //         cloest = j;
+            //     }
+            // }
+            let cen = nodes[0].bbox.centroid();
+            let clo = nodes.par_iter().enumerate().min_by(|x, y| cost(cen, x.1).partial_cmp(&cost(cen, y.1)).unwrap()).unwrap();
+            let cloest = clo.0;
             let rnode = nodes.remove(cloest);
             let lnode = nodes.remove(0);
             let node = Node {
@@ -261,4 +270,8 @@ impl Node {
         }
         nodes.remove(0)
     }
+}
+
+pub fn cost(centroid: Vec3, node: &Node) -> f32 {
+    (centroid - node.bbox.centroid()).length()
 }
