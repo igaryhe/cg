@@ -29,11 +29,11 @@ pub fn rasterize_triangle(program: &mut Program, uniform: UniformAttributes, v1:
     let uy = y.into_iter().max_by(f32_cmp).unwrap().min(frame_buffer.width() as f32 - 1.0) as u32;
 
     let mut a = Mat3::zero();
-    a.set_x_axis(p[0].truncate().into());
-    a.set_y_axis(p[1].truncate().into());
-    a.set_z_axis(p[2].truncate().into());
+    a.x_axis = p[0].truncate();
+    a.y_axis = p[1].truncate();
+    a.z_axis = p[2].truncate();
     a = a.transpose();
-    a.set_z_axis(Vec3::one());
+    a.z_axis = Vec3::one();
     a = a.transpose();
 
     let ai = a.inverse();
@@ -43,7 +43,7 @@ pub fn rasterize_triangle(program: &mut Program, uniform: UniformAttributes, v1:
             let pixel = vec3(i as f32 + 0.5, j as f32 + 0.5, 1.0);
             let b = ai * pixel;
             if b.min_element() >= 0.0 {
-                let va = VertexAttributes::interpolate(v1, v2, v3, b.x(), b.y(), b.z());
+                let va = VertexAttributes::interpolate(v1, v2, v3, b.x, b.y, b.z);
                 if va.position[2] >= -1.0 && va.position[2] <= 1.0 {
                     let frag = (program.fragment_shader)(va, uniform);
                     let h = frame_buffer.height() - 1;
@@ -64,8 +64,8 @@ pub fn rasterize_triangles(program: &mut Program, uniform: UniformAttributes, ve
 
 pub fn rasterize_line(program: &mut Program, uniform: UniformAttributes, v1: VertexAttributes, v2: VertexAttributes, line_thickness: f32, frame_buffer: &mut RgbaImage) {
     let mut p = vec![];
-    p.push(v1.position / v1.position.w());
-    p.push(v2.position / v2.position.w());
+    p.push(v1.position / v1.position.w);
+    p.push(v2.position / v2.position.w);
 
     p.iter_mut().for_each(|point| {
         point[0] = ((point[0] + 1.0) / 2.0) * frame_buffer.height() as f32;
