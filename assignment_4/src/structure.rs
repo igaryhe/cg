@@ -1,7 +1,7 @@
 use glam::Vec3;
 use serde::{Serialize, Deserialize};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Ray {
     pub origin: Vec3,
     pub direction: Vec3,

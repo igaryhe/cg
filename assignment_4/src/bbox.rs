@@ -22,7 +22,7 @@ impl Bbox {
         let mut tmax = t1.max(t2);
         for i in 1..3 {
             t1 = (self.min[i] - ray.origin[i]) * (1.0 / ray.direction[i]);
-            t2 = (self.max[i] - ray.origin[i]) * (1.0 / -ray.direction[i]);
+            t2 = (self.max[i] - ray.origin[i]) * (1.0 / ray.direction[i]);
             tmin = tmin.max(t1.min(t2));
             tmax = tmax.min(t1.max(t2));
         }
