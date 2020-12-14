@@ -11,6 +11,18 @@ pub fn point(x: f32, y: f32) -> Point {
     Point { x, y }
 }
 
+impl Point {
+    fn det(&self, v: &Self) -> f32 {
+        todo!()
+    }
+}
+
+impl PartialOrd for Point {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        todo!()
+    }
+}
+
 impl Sub for Point {
     type Output = Vec2;
     
