@@ -1,7 +1,8 @@
 pub mod structure;
 pub mod file;
 
-use structure::*;
+pub use structure::*;
+pub use file::*;
 use anyhow::{Result, Context};
 
 #[inline]

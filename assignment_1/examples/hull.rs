@@ -1,6 +1,5 @@
 use std::env;
 use assignment_1::*;
-use assignment_1::file::*;
 use anyhow::Result;
 
 fn main() -> Result<()> {

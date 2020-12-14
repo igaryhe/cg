@@ -1,7 +1,5 @@
 use std::env;
 use assignment_1::*;
-use assignment_1::file::*;
-use assignment_1::structure::*;
 use anyhow::Result;
 
 fn main() -> Result<()> {
@@ -13,7 +11,7 @@ fn main() -> Result<()> {
         _ => {
             let points = load_xyz(args[1].as_str())?;
             let poly = load_obj(args[2].as_str())?;
-            let mut result: Vec<Point> = vec![];
+            let mut result: Polygon = vec![];
             points.into_iter().for_each(|point| {
                 if is_inside(&poly, point) {
                     result.push(point);
