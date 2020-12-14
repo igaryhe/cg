@@ -1,9 +1,8 @@
-mod structure;
-mod file;
+pub mod structure;
+pub mod file;
 
-use std::env;
 use structure::*;
-use file::*;
+use anyhow::{Result, Context};
 
 #[inline]
 fn det(u: &Point, v: &Point) -> f32 {
@@ -20,26 +19,24 @@ fn salient_angle(a: &Point, b: &Point, c: &Point) -> i8 {
     }
 }
 
-fn convex_hull(points: &mut Vec<Point>) -> Vec<Point> {
-    let p0 = *points.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
-    points.sort_by(|a, b| {
-        det(&p0, b).partial_cmp(&det(&p0, a)).unwrap()
-    });
+pub fn convex_hull(points: &mut Polygon) -> Result<Polygon> {
+    let p0 = *points.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).context("")?;
+    points.sort_by(|a, b| det(&p0, b).partial_cmp(&det(&p0, a)).unwrap());
     let mut hull: Vec<Point> = vec![];
     hull.push(p0);
-    let pos = points.iter().position(|&p| p == p0).unwrap();
+    let pos = points.iter().position(|&p| p == p0).context("")?;
     points.remove(pos);
     hull.push(points[0]);
     hull.push(points[1]);
     points.remove(0);
     points.remove(0);
-    points.iter().for_each(|point| {
-        while salient_angle(hull.get(hull.len() - 2).unwrap(), hull.last().unwrap(), point) != 1 {
+    for point in points {
+        while salient_angle(&hull[hull.len() - 2], hull.last().context("")?, point) != 1 {
             hull.pop();
         }
         hull.push(*point);
-    });
-    hull
+    }
+    Ok(hull)
 }
 
 #[inline]
@@ -63,7 +60,7 @@ fn intersect_segment(a: &Point, b: &Point, c: &Point, d: &Point) -> bool {
     false
 }
 
-fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
+pub fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
     // 1. Compute bounding box and set coordinate of a point outside the polygon
     // TODO
     let mut outside = point(0.0, 0.0);
@@ -80,44 +77,9 @@ fn is_inside(poly: &Vec<Point>, query: Point) -> bool {
     // TODO
     let mut count: u32 = 0;
     for i in 0..poly.len() {
-        if intersect_segment(&outside, &query, poly.get(i).unwrap(), poly.get((i + 1) % poly.len()).unwrap()) {
+        if intersect_segment(&outside, &query, &poly[i], &poly[(i + 1) % poly.len()]) {
             count += 1;
         }
     }
     if count % 2 == 1 { true } else { false }
-}
-
-
-fn main() {
-    let args: Vec<String> = env::args().collect();
-
-    /*
-    match args.len() {
-        0 | 1 => {
-            eprintln!("Usage: {} points.xyz output.obj", args[0]);
-        },
-        _ => {
-            let mut points = load_xyz(args[1].as_str());
-            let hull = convex_hull(&mut points);
-            save_obj(args[2].as_str(), hull);
-        }
-    }
-    */
-
-    match args.len() {
-        0 | 1 | 2 | 3 => {
-            eprintln!("Usage: {} points.xyz poly.obj result.xyz", args[0]);   
-        },
-        _ => {
-            let points = load_xyz(args[1].as_str());
-            let poly = load_obj(args[2].as_str());
-            let mut result: Vec<Point> = vec![];
-            points.into_iter().for_each(|point| {
-                if is_inside(&poly, point) {
-                    result.push(point);
-                }
-            });
-            save_xyz(args[3].as_str(), result);
-        }
-    }
 }

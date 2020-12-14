@@ -51,3 +51,5 @@ impl Mul for Vec2 {
         self.x * other.x + self.y * other.y
     }
 }
+
+pub type Polygon = Vec<Point>;
