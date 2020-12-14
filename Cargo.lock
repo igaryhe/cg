@@ -32,7 +32,7 @@ dependencies = [
 name = "assignment_2"
 version = "0.1.0"
 dependencies = [
- "glam 0.9.3",
+ "glam 0.11.2",
  "image",
  "mint",
  "nalgebra",
@@ -354,6 +354,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "579160312273c954cc51bd440f059dde741029ac8daf8c84fece76cb77f62c15"
 dependencies = [
  "serde",
+ "version_check",
+]
+
+[[package]]
+name = "glam"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bef81f244b2a421ddb8ccb382857772379c0996fe5948992db5bee51cef3c28e"
+dependencies = [
+ "mint",
  "version_check",
 ]
 
