@@ -32,7 +32,7 @@ dependencies = [
 name = "assignment_2"
 version = "0.1.0"
 dependencies = [
- "glam 0.11.2",
+ "glam",
  "image",
  "mint",
  "nalgebra",
@@ -44,7 +44,7 @@ name = "assignment_3"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "glam 0.11.2",
+ "glam",
  "image",
  "indicatif",
  "mint",
@@ -61,7 +61,7 @@ name = "assignment_4"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "glam 0.11.2",
+ "glam",
  "image",
  "indicatif",
  "mint",
@@ -78,7 +78,7 @@ name = "assignment_5"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "glam 0.11.2",
+ "glam",
  "image",
  "indicatif",
  "serde",
@@ -89,7 +89,7 @@ dependencies = [
 name = "assignment_6"
 version = "0.1.0"
 dependencies = [
- "glam 0.9.3",
+ "glam",
  "image",
  "minifb",
 ]
@@ -338,12 +338,6 @@ dependencies = [
  "color_quant",
  "lzw",
 ]
-
-[[package]]
-name = "glam"
-version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a09830d3a54df0e02f67340598635e75446cb87dc0d8d734f3c9742e02cc04f"
 
 [[package]]
 name = "glam"
