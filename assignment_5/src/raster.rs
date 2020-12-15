@@ -11,19 +11,13 @@ pub struct Program {
 pub fn rasterize_triangle(program: &mut Program,uniform: UniformAttributes,
                           v1: VertexAttributes, v2: VertexAttributes,
                           v3: VertexAttributes, frame_buffer: &mut FrameBuffer) -> Result<()> {
+    // Collect coordinates into a matrix and convert to canonical representation
     let mut p = vec![];
     p.push(v1.position / v1.position.w);
     p.push(v2.position / v2.position.w);
     p.push(v3.position / v3.position.w);
 
-    // let normal = (v2.position - v1.position).truncate().cross((v3.position - v1.position).truncate()).normalize();
-    // let mut v1n = v1;
-    // let mut v2n = v2;
-    // let mut v3n = v3;
-    // v1n.normal = normal;
-    // v2n.normal = normal;
-    // v3n.normal = normal;
-
+    // Coordinates are in -1..1, rescale to pixel size (x,y only)
     p.iter_mut().for_each(|point| {
         point[0] = ((point[0] + 1.0) / 2.0) * frame_buffer.width() as f32;
         point[1] = ((point[1] + 1.0) / 2.0) * frame_buffer.height() as f32;
@@ -33,11 +27,13 @@ pub fn rasterize_triangle(program: &mut Program,uniform: UniformAttributes,
     let x: Vec<f32> = p.iter().map(|point| point[0]).collect();
     let y: Vec<f32> = p.iter().map(|point| point[1]).collect();
 
+    // Find bounding box in pixels
     let lx = x.clone().into_iter().min_by(f32_cmp).context("min error")?.max(0.0) as u32;
     let ly = y.clone().into_iter().min_by(f32_cmp).context("min error")?.max(0.0) as u32;
     let ux = x.into_iter().max_by(f32_cmp).context("max error")?.min(frame_buffer.width() as f32 - 1.0) as u32;
     let uy = y.into_iter().max_by(f32_cmp).context("max error")?.min(frame_buffer.height() as f32 - 1.0) as u32;
 
+    // Build the implicit triangle representation
     let mut a = Mat3::zero();
     a.x_axis = p[0].truncate();
     a.y_axis = p[1].truncate();
@@ -50,11 +46,12 @@ pub fn rasterize_triangle(program: &mut Program,uniform: UniformAttributes,
 
     for i in lx..=ux {
         for j in ly..=uy {
+            // The pixel center is offset by 0.5, 0.5
             let pixel = vec3(i as f32 + 0.5, j as f32 + 0.5, 1.0);
             let b = ai * pixel;
             if b.min_element() >= 0.0 {
                 let va = VertexAttributes::interpolate(v1, v2, v3, b.x, b.y, b.z);
-                // let va = VertexAttributes::interpolate(v1n, v2n, v3n, b.x, b.y, b.z);
+                // Only render fragments within the bi-unit cube
                 if va.position[2] >= -1.0 && va.position[2] <= 1.0 {
                     let frag = (program.fragment_shader)(va, uniform);
                     let h = frame_buffer.height() - 1;
@@ -71,8 +68,10 @@ pub fn rasterize_triangles(program: &mut Program, uniform: UniformAttributes,
                            vertices: &Vec<VertexAttributes>, indices: &Vec<usize>,
                            frame_buffer: &mut FrameBuffer) -> Result<()> {
     let mut v: Vec<VertexAttributes> = vec![];
+    // Call vertex shader on all vertices
     vertices.clone().into_iter().for_each(|vertex| v.push((program.vertex_shader)(vertex, uniform)));
     for i in 0..indices.len() / 3 {
+        // Call the rasterization function on every triangle
         rasterize_triangle(program, uniform, v[indices[i * 3 + 0]],
                            v[indices[i * 3 + 1]], v[indices[i * 3 + 2]], frame_buffer)?;
     }
@@ -95,6 +94,7 @@ pub fn rasterize_line(program: &mut Program, uniform: UniformAttributes,
     let x: Vec<f32> = p.iter().map(|point| point[0]).collect();
     let y: Vec<f32> = p.iter().map(|point| point[1]).collect();
 
+    // Find bounding box in pixels, adding the line thickness
     let lx = (x.clone().into_iter().min_by(f32_cmp).context("min error")? - line_thickness).max(0.0) as u32;
     let ly = (y.clone().into_iter().min_by(f32_cmp).context("max error")? - line_thickness).max(0.0) as u32;
     let ux = (x.into_iter().max_by(f32_cmp).context("max error")? + line_thickness)
@@ -109,10 +109,14 @@ pub fn rasterize_line(program: &mut Program, uniform: UniformAttributes,
 
     for i in lx..=ux {
         for j in ly..=uy {
+            // The pixel center is offset by 0.5, 0.5
             let pixel = vec2(i as f32 + 0.5, j as f32 + 0.5);
             let t = if ll == 0.0 {
+                // The segment has zero length
                 0.0
             } else {
+                // Project p on the line
+                // Clamp between 0 and 1
                 ((pixel - l1).dot(l2 - l1) / ll).min(1.0).max(0.0)
             };
             
@@ -134,9 +138,16 @@ pub fn rasterize_lines(program: &mut Program, uniform: UniformAttributes,
                        vertices: &Vec<VertexAttributes>, indices: &Vec<usize>,
                        line_thickness: f32, frame_buffer: &mut FrameBuffer) -> Result<()> {
     let mut v: Vec<VertexAttributes> = vec![];
+    // Call vertex shader on all vertices
     vertices.clone().into_iter().for_each(|vertex| v.push((program.vertex_shader)(vertex, uniform)));
     for i in 0..indices.len() / 2 {
-        rasterize_line(program, uniform, v[indices[i * 2 + 0]], v[indices[i * 2 + 1]], line_thickness, frame_buffer)?;
+        // Call the rasterization function on every line
+        rasterize_line(program,
+                       uniform,
+                       v[indices[i * 2 + 0]],
+                       v[indices[i * 2 + 1]],
+                       line_thickness,
+                       frame_buffer)?;
     }
     Ok(())
 }

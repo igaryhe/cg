@@ -6,26 +6,22 @@ use std::f32::consts::*;
 #[derive(Copy, Clone, Default)]
 pub struct VertexAttributes {
     pub position: Vec4,
-    pub normal: Vec3,
-    pub frag_pos: Vec3,
 }
 
 impl VertexAttributes {
-    pub fn new(position: Vec3, normal: Vec3) -> Self {
+    pub fn new(position: Vec3) -> Self {
         Self {
             position: position.extend(1.0),
-            normal,
-            frag_pos: Vec3::zero(),
         }
     }
 
+    // Interpolates the vertex attributes
     pub fn interpolate(a: VertexAttributes, b: VertexAttributes,
                        c: VertexAttributes, alpha: f32, beta: f32, gamma: f32) -> Self {
         let mut r = VertexAttributes::default();
         r.position = alpha * (a.position / a.position.w)
             + beta * (b.position / b.position.w)
             + gamma * (c.position / c.position.w);
-        r.normal = (alpha * a.normal + beta * b.normal + gamma * c.normal).normalize();
         r
         }
 }
@@ -33,79 +29,29 @@ impl VertexAttributes {
 #[derive(Copy, Clone, Default)]
 pub struct FragmentAttributes {
     pub color: Vec4,
-    pub position: Vec3,
-    pub normal: Vec3,
 }
 
 impl FragmentAttributes {
-    pub fn new(color: Vec4, position: Vec3, normal: Vec3) -> Self {
+    pub fn new(color: Vec4) -> Self {
         Self {
             color,
-            position,
-            normal,
         }
     }
 }
 
 #[derive(Copy, Clone, Default, Deserialize)]
 pub struct UniformAttributes {
-    pub light: Light,
-    pub material: Material,
-    pub camera: Camera,
-    pub transform: Transform,
-    pub view_matrix: Mat4,
-    pub model_matrix: Mat4,
-    pub projection_matrix: Mat4,
-    pub normal_matrix: Mat4,
-}
-
-impl UniformAttributes {
-    pub fn calc_model_matrix(&mut self) {
-        let mut transform = Mat4::identity();
-        let cos = (self.transform.angle * PI).cos();
-        let sin = (self.transform.angle * PI).sin();
-        transform.w_axis.z = -self.transform.distance;
-        transform.x_axis.x = cos;
-        transform.x_axis.z = sin;
-        transform.z_axis.x = -sin;
-        transform.z_axis.z = cos;
-        self.model_matrix = transform;
-        self.normal_matrix = transform.inverse().transpose();
-    }
-
-    pub fn calc_view_matrix(&mut self) {
-        let mut transform = Mat4::identity();
-        transform.w_axis.x = -self.camera.position.x;
-        transform.w_axis.y = -self.camera.position.y;
-        transform.w_axis.z = -self.camera.position.z;
-        self.view_matrix = transform;
-    }
-
-    pub fn calc_projection_matrix(&mut self) {
-        self.projection_matrix = match self.camera.is_perspective {
-            true => Mat4::perspective_rh(self.camera.field_of_view, self.camera.aspect_ratio, -1.0, 1.0),
-            false => Mat4::identity(),// Mat4::orthographic_rh(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0),
-        };
-    }
-
-    pub fn calc_matrices(&mut self) {
-        self.calc_model_matrix();
-        self.calc_view_matrix();
-        self.calc_projection_matrix();
-    }
 }
 
 #[derive(Copy, Clone)]
 pub struct FrameBufferAttributes {
     pub color: Rgba<u8>,
-    pub depth: f32,
 }
 
 impl FrameBufferAttributes {
     pub fn new() -> Self {
         FrameBufferAttributes {
             color: Rgba([255, 255, 255, 255]),
-            depth: 100.0,
         }
     }
 
