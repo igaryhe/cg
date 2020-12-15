@@ -11,7 +11,7 @@ impl Ray {
     pub fn new(o: Vec3, d: Vec3) -> Self {
         Self {
             origin: o,
-            direction: d
+            direction: d,
         }
     }
 }
@@ -33,9 +33,9 @@ pub struct Intersection {
 pub struct Camera {
     pub is_perspective: bool,
     pub position: Vec3,
-    pub field_of_view: f32,
+    pub field_of_view: f32, // between 0 and PI
     pub focal_length: f32,
-    pub lens_radius: f32,
+    pub lens_radius: f32, // for depth of field
 }
 
 #[derive(Default, Copy, Clone, Serialize, Deserialize)]
@@ -43,7 +43,7 @@ pub struct Material {
     pub ambient_color: Vec3,
     pub diffuse_color: Vec3,
     pub specular_color: Vec3,
-    pub specular_exponent: f32,
+    pub specular_exponent: f32, // Also called "shininess"
 
     pub reflection_color: Vec3,
     pub refraction_color: Vec3,
