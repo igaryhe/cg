@@ -28,47 +28,8 @@ impl Object for Sphere {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        // TODO:
-        //
-        // Compute the intersection between the ray and the sphere
-        // If the ray hits the sphere, set the result of the intersection in the
-        // struct 'hit'
-        let distance = ray.origin - self.position;
-        let a = ray.direction.dot(ray.direction);
-        let b = 2.0 * distance.dot(ray.direction);
-        let c = distance.dot(distance) - self.radius.powi(2);
-        let delta = b.powi(2) - 4.0 * a * c;
-        if delta < 0.0 {
-            None
-        } else if delta == 0.0 {
-            let t = -b / (2.0 * a);
-            if t >= 0.0 {
-                let position = ray.origin + t * ray.direction;
-                let normal = (position - self.position).normalize();
-                Some(Intersection {
-                    position,
-                    normal,
-                    ray_param: 0.0
-                })
-            } else {
-                None
-            }
-        } else {
-            let t1 = (-b + delta.sqrt()) / (2.0 * a);
-            let t2 = (-b - delta.sqrt()) / (2.0 * a);
-            if t1 < 0.0 && t2 < 0.0 {
-                None
-            } else {
-                let t = t1.min(t2);
-                let position = ray.origin + t * ray.direction;
-                let normal = (position - self.position).normalize();
-                Some(Intersection {
-                    position,
-                    normal,
-                    ray_param: 0.0
-                })
-            }
-        }
+        // TODO (Assignment 2)
+        todo!()
     }
 }
 
@@ -87,25 +48,8 @@ impl Object for Parallelogram {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        // TODO
-        let a = Mat3::from_cols(self.u, self.v, -ray.direction);
-        let a = Matrix3::from(ColumnMatrix3::from(a));
-        let decomp = a.lu();
-        let b = ray.origin - self.origin;
-        let b = Vector3::from(mint::Vector3::from(b));
-        let x = decomp.solve(&b).unwrap();
-        match x[0] >= 0.0 && x[0] <= 1.0 && x[1] >= 0.0 && x[1] <= 1.0 && x[2] >= 0.0 {
-            true => {
-                let position = ray.origin + x[2] * ray.direction;
-                let normal = self.v.cross(self.u).normalize();
-                Some(Intersection {
-                    position,
-                    normal,
-                    ray_param: 0.0
-                })
-            },
-            false => None
-        }
+        // TODO (Assignment 2)
+        todo!()
     }
 }
 
@@ -124,6 +68,7 @@ pub struct Mesh {
     bvh: Node,
 }
 
+// Read a triangle mesh from an off file
 pub fn load_off(filename: &str) -> Vec<Triangle> {
     use std::io::BufRead;
     let file = std::fs::File::open(filename).unwrap();
@@ -183,41 +128,13 @@ impl Mesh {
 
 impl Node {
     fn search(&self, ray: &Ray) -> Option<Intersection> {
-        match self.triangle {
-            Some(tri) => {
-                tri.intersect(ray)
-            },
-            None => {
-                if self.bbox.intersect(ray) {
-                    let left = match &self.left {
-                        Some(node) => { node.search(ray) },
-                        None => { None },
-                    };
-                    let right = match &self.right {
-                        Some(node) => { node.search(ray) },
-                        None => { None },
-                    };
-                    match left {
-                        Some(lhit) => {
-                            match right {
-                                Some(rhit) => {
-                                    if (lhit.position - ray.origin).length() < (rhit.position - ray.origin).length() {
-                                        Some(lhit)
-                                    } else { Some(rhit) }
-                                },
-                                None => Some(lhit),
-                            }
-                        },
-                        None => {
-                            match right {
-                                Some(rhit) => Some(rhit),
-                                None => None,
-                            }
-                        },
-                    }
-                } else { None }
-            },
-        }
+        // TODO (Assignment 3)
+
+	// Method (1): Traverse every triangle and return the closest hit.
+
+	// Method (2): Traverse the BVH tree and test the intersection with a
+	// triangles at the leaf nodes that intersects the input ray.
+        todo!()
     }
 
     fn cost(&self, node: &Node) -> f32 {
@@ -234,40 +151,6 @@ impl Node {
         // Method (2): Bottom-up approach.
         // Merge nodes 2 by 2, starting from the leaves of the forest, until only 1 tree is left.
         let mut nodes: Vec<Node> = vec![];
-        triangles.iter().for_each(|triangle| {
-            let node = Node {
-                bbox: triangle.bbox(),
-                left: None,
-                right: None,
-                triangle: Some(*triangle),
-            };
-            nodes.push(node);
-        });
-
-        println!("Building BVH:");
-        let pb = ProgressBar::new(nodes.len() as u64);
-        while nodes.len() != 1 {
-            pb.inc(1);
-            // let mut cloest = 1;
-            // let max_len = if nodes.len() > 100 { 100 } else { nodes.len() };
-            // for j in 1..max_len {
-            //     if nodes[0].cost(&nodes[j]) < nodes[0].cost(&nodes[cloest]) {
-            //         cloest = j;
-            //     }
-            // }
-            let cen = nodes[0].bbox.centroid();
-            let clo = nodes.par_iter().enumerate().min_by(|x, y| cost(cen, x.1).partial_cmp(&cost(cen, y.1)).unwrap()).unwrap();
-            let cloest = clo.0;
-            let rnode = nodes.remove(cloest);
-            let lnode = nodes.remove(0);
-            let node = Node {
-                bbox: lnode.bbox.merge(&rnode.bbox),
-                left: Some(Box::new(lnode)),
-                right: Some(Box::new(rnode)),
-                triangle: None,
-            };
-            nodes.push(node);
-        }
         nodes.remove(0)
     }
 }

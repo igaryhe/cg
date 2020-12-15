@@ -16,17 +16,12 @@ impl Bbox {
     }
 
     pub fn intersect(&self, ray: &Ray) -> bool {
-        let mut t1 = (self.min.x() - ray.origin.x()) * (1.0 / ray.direction.x());
-        let mut t2 = (self.max.x() - ray.origin.x()) * (1.0 / ray.direction.x());
-        let mut tmin = t1.min(t2);
-        let mut tmax = t1.max(t2);
-        for i in 1..3 {
-            t1 = (self.min[i] - ray.origin[i]) * (1.0 / ray.direction[i]);
-            t2 = (self.max[i] - ray.origin[i]) * (1.0 / ray.direction[i]);
-            tmin = tmin.max(t1.min(t2));
-            tmax = tmax.min(t1.max(t2));
-        }
-        tmax > tmin.max(0.0)
+        // TODO (Assignment 3)
+	//
+	// Compute whether the ray intersects the given box.
+	// There is no need to set the resulting normal and ray parameter, since
+	// we are not testing with the real surface here anyway.
+        todo!()
     }
 
     pub fn centroid(&self) -> Vec3 {

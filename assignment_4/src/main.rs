@@ -18,7 +18,6 @@ fn main() {
         _ => {
             let mut scene = Scene::load(args[1].as_str());
             let mesh = Mesh::new("data/bunny.off", scene.materials[0]);
-            scene.objects.clear();
             scene.objects.push(Box::new(mesh));
             scene.render();
         }

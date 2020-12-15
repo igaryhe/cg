@@ -23,30 +23,11 @@ impl Triangle {
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<Intersection> {
-        let u = self.b - self.a;
-        let v = self.c - self.a;
-        let origin = self.a;
-        let a = Matrix3::from(ColumnMatrix3::from(Mat3::from_cols(u, v, -ray.direction)));
-        let decomp = a.lu();
-        let b = Vector3::from(mint::Vector3::from(ray.origin - origin));
-        let x = decomp.solve(&b);
-        match x {
-            Some(xr) => {
-                match xr[0] >= 0.0 && xr[1] >= 0.0 && xr[0] + xr[1] <= 1.0 && xr[2] >= 0.0 {
-                    true => {
-                        let position = ray.origin + xr[2] * ray.direction;
-                        let normal = u.cross(v).normalize();
-                        Some(Intersection {
-                            position,
-                            normal,
-                            ray_param: 0.0
-                        })
-                    },
-                    false => None,
-                }
-            },
-            None => None,
-        }
+        // TODO (Assignment 3)
+	//
+	// Compute whether the ray intersects the given triangle.
+	// If you have done the parallelogram case, this should be very similar to it.
+        todo!()
     }
 
     pub fn centroid(&self) -> Vec3 {

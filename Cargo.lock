@@ -60,7 +60,8 @@ dependencies = [
 name = "assignment_4"
 version = "0.1.0"
 dependencies = [
- "glam 0.9.3",
+ "anyhow",
+ "glam 0.11.2",
  "image",
  "indicatif",
  "mint",
@@ -343,10 +344,6 @@ name = "glam"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a09830d3a54df0e02f67340598635e75446cb87dc0d8d734f3c9742e02cc04f"
-dependencies = [
- "mint",
- "serde",
-]
 
 [[package]]
 name = "glam"
